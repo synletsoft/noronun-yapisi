@@ -18,6 +18,15 @@ const sections = [
     buttonIdle: "./kaynak/1. Kısım/Dentridbağlantıbt.png",
     buttonActive: "./kaynak/1. Kısım/Dentridbağlantıbt2.png",
     defaultCamera: { direction: [0, 0.12, 1], distance: 2.5, fov: 42 },
+    hotspots: [
+      { cardIndex: 0, title: "Dendrit", point: [0.10, 0.64, 0.50], distance: 2.0 },
+      { cardIndex: 1, title: "Hücre Gövdesi", point: [0.32, 0.48, 0.52], distance: 1.9 },
+      { cardIndex: 2, title: "Çekirdek", point: [0.37, 0.50, 0.53], distance: 1.8 },
+      { cardIndex: 3, title: "Miyelin Kılıf", point: [0.55, 0.49, 0.52], distance: 2.1 },
+      { cardIndex: 4, title: "Ranvier Boğumu", point: [0.63, 0.49, 0.52], distance: 2.2 },
+      { cardIndex: 5, title: "Akson", point: [0.76, 0.48, 0.52], distance: 2.3 },
+      { cardIndex: 6, title: "Akson Ucu", point: [0.90, 0.58, 0.56], distance: 2.6 },
+    ],
     cards: [
       {
         title: "Dendrit",
@@ -69,6 +78,10 @@ const sections = [
     buttonIdle: "./kaynak/2. kısım/Synapsbt.png",
     buttonActive: "./kaynak/2. kısım/Synapsbt2.png",
     defaultCamera: { direction: [0, 0.08, 1], distance: 2.4, fov: 41 },
+    hotspots: [
+      { cardIndex: 0, title: "Sinaps Bağlantı", point: [0.50, 0.52, 0.52], distance: 1.95 },
+      { cardIndex: 1, title: "Dendrit Bağlantısı", point: [0.43, 0.36, 0.47], distance: 2.05 },
+    ],
     cards: [
       {
         title: "Sinaps Bağlantı",
@@ -89,6 +102,7 @@ const state = {
   sectionId: "section-1",
   cardIndex: 0,
   soundEnabled: false,
+  cardVisible: true,
 };
 
 const app = document.querySelector("#app");
@@ -107,8 +121,8 @@ const soundIcon = document.querySelector("#soundIcon");
 const menuIcon = document.querySelector("#menuIcon");
 const shareIcon = document.querySelector("#shareIcon");
 const fullscreenIcon = document.querySelector("#fullscreenIcon");
-const sectionPill = document.querySelector("#sectionPill");
-const sectionTitle = document.querySelector("#sectionTitle");
+const infoCard = document.querySelector("#infoCard");
+const cardClose = document.querySelector("#cardClose");
 const cardImage = document.querySelector("#cardImage");
 const cardFallback = document.querySelector("#cardFallback");
 const cardEmblem = document.querySelector("#cardEmblem");
@@ -116,10 +130,6 @@ const cardFallbackTitle = document.querySelector("#cardFallbackTitle");
 const cardFallbackDesc = document.querySelector("#cardFallbackDesc");
 const cardTitle = document.querySelector("#cardTitle");
 const cardDescription = document.querySelector("#cardDescription");
-const cardCounter = document.querySelector("#cardCounter");
-const cardDots = document.querySelector("#cardDots");
-const cardPrev = document.querySelector("#cardPrev");
-const cardNext = document.querySelector("#cardNext");
 const menuPanel = document.querySelector("#menuPanel");
 const menuSection1 = document.querySelector("#menuSection1");
 const menuSection2 = document.querySelector("#menuSection2");
@@ -150,6 +160,10 @@ scene.add(fillLight);
 
 const modelRoot = new THREE.Group();
 scene.add(modelRoot);
+const hotspotRoot = new THREE.Group();
+scene.add(hotspotRoot);
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -166,13 +180,16 @@ let renderRequested = true;
 let toastTimer = null;
 let currentCardSource = "";
 let materialCache = new Map();
+let hotspotTextureCache = new Map();
+let cameraFlight = null;
+let activeHotspotIndex = -1;
+let pointerDrag = null;
 
 applyIcons();
 restoreState();
 applyTheme(getSection());
 renderSectionButtons();
 renderCard();
-renderCardDots();
 wireEvents();
 resize();
 loadCurrentSection({ immediate: true });
@@ -211,36 +228,14 @@ function renderSectionButtons() {
   sectionButton2.setAttribute("aria-pressed", String(state.sectionId === second.id));
 }
 
-function renderCardDots() {
-  const section = getSection();
-  cardDots.replaceChildren();
-
-  section.cards.forEach((card, index) => {
-    const dot = document.createElement("button");
-    dot.type = "button";
-    dot.className = "card-dot";
-    dot.setAttribute("aria-label", card.title);
-    dot.classList.toggle("active", index === state.cardIndex);
-    dot.addEventListener("click", () => {
-      state.cardIndex = index;
-      renderCard();
-      playUiTone(480);
-      showToast(card.title);
-    });
-    cardDots.append(dot);
-  });
-}
-
 function renderCard() {
   const section = getSection();
   const card = getCurrentCard();
 
-  sectionPill.textContent = section.label;
-  sectionTitle.textContent = section.title;
   cardTitle.textContent = card.title;
   cardDescription.textContent = card.description;
-  cardCounter.textContent = `${state.cardIndex + 1} / ${section.cards.length}`;
   currentCardSource = card.image ? new URL(card.image, import.meta.url).href : "";
+  activeHotspotIndex = section.hotspots.findIndex((hotspot) => hotspot.cardIndex === state.cardIndex);
 
   if (card.image) {
     cardImage.src = currentCardSource;
@@ -262,8 +257,8 @@ function renderCard() {
     }
   }
 
-  renderCardDots();
-  renderSectionButtons();
+  syncHotspots();
+  infoCard.classList.toggle("hidden", !state.cardVisible);
 }
 
 function applyTheme(section) {
@@ -276,8 +271,7 @@ function applyTheme(section) {
 function wireEvents() {
   sectionButton1.addEventListener("click", () => switchSection("section-1"));
   sectionButton2.addEventListener("click", () => switchSection("section-2"));
-  cardPrev.addEventListener("click", () => stepCard(-1));
-  cardNext.addEventListener("click", () => stepCard(1));
+  cardClose.addEventListener("click", hideInfoCard);
   refreshButton.addEventListener("click", () => {
     playUiTone(320);
     loadCurrentSection({ immediate: true });
@@ -308,6 +302,13 @@ function wireEvents() {
   window.addEventListener("resize", resize);
   document.addEventListener("keydown", onKeyDown);
   document.addEventListener("fullscreenchange", syncFullscreenButton);
+  canvas.addEventListener("pointerdown", onCanvasPointerDown);
+  canvas.addEventListener("pointermove", onCanvasPointerMove);
+  canvas.addEventListener("pointerup", onCanvasPointerUp);
+  canvas.addEventListener("pointerleave", () => {
+    canvas.style.cursor = "default";
+    pointerDrag = null;
+  });
   canvas.addEventListener("dblclick", () => loadCurrentSection({ immediate: true }));
   canvas.addEventListener("contextmenu", (event) => event.preventDefault());
   controls.addEventListener("start", () => requestRender());
@@ -324,8 +325,6 @@ function onKeyDown(event) {
   if (event.code === "KeyM") toggleMenu();
   if (event.code === "Digit1") switchSection("section-1");
   if (event.code === "Digit2") switchSection("section-2");
-  if (event.code === "ArrowLeft") stepCard(-1);
-  if (event.code === "ArrowRight") stepCard(1);
 }
 
 function switchSection(sectionId) {
@@ -334,20 +333,12 @@ function switchSection(sectionId) {
   state.sectionId = sectionId;
   state.cardIndex = 0;
   applyTheme(getSection());
+  showInfoCard();
   renderCard();
   persistState();
   loadCurrentSection({ immediate: true });
   playUiTone(360);
   showToast(getSection().title);
-}
-
-function stepCard(direction) {
-  const section = getSection();
-  const next = (state.cardIndex + direction + section.cards.length) % section.cards.length;
-  state.cardIndex = next;
-  renderCard();
-  persistState();
-  playUiTone(500);
 }
 
 function loadCurrentSection({ immediate = false } = {}) {
@@ -379,11 +370,14 @@ function loadCurrentSection({ immediate = false } = {}) {
     (gltf) => {
       if (token !== loadingToken) return;
       modelRoot.clear();
+      hotspotRoot.clear();
+      cameraFlight = null;
       materialCache = new Map();
       modelRoot.add(gltf.scene);
       centerModel(gltf.scene);
       prepareModel(gltf.scene);
       applyReferenceMaterials(gltf.scene, section);
+      buildHotspots(gltf.scene, section);
       frameCamera(section, immediate);
       loadingOverlay.classList.add("hidden");
       loadingBar.style.width = "100%";
@@ -522,6 +516,194 @@ function applyReferenceMaterials(root, section) {
   });
 }
 
+function buildHotspots(root, section) {
+  const box = new THREE.Box3().setFromObject(root);
+  const toPoint = (point) =>
+    new THREE.Vector3(
+      THREE.MathUtils.lerp(box.min.x, box.max.x, point[0]),
+      THREE.MathUtils.lerp(box.min.y, box.max.y, point[1]),
+      THREE.MathUtils.lerp(box.min.z, box.max.z, point[2]),
+    );
+
+  section.hotspots.forEach((hotspot, index) => {
+    const marker = createHotspotMarker(section, hotspot, index);
+    marker.position.copy(toPoint(hotspot.point));
+    marker.userData.hotspot = hotspot;
+    marker.userData.hotspotIndex = index;
+    hotspotRoot.add(marker);
+  });
+
+  syncHotspots();
+}
+
+function createHotspotMarker(section, hotspot, index) {
+  const sprite = new THREE.Sprite(
+    new THREE.SpriteMaterial({
+      map: getHotspotTexture(section.accent),
+      transparent: true,
+      depthTest: false,
+      depthWrite: false,
+      opacity: 0.95,
+      color: new THREE.Color(section.accent),
+    }),
+  );
+  sprite.renderOrder = 999;
+  sprite.userData.hotspot = hotspot;
+  sprite.userData.hotspotIndex = index;
+  return sprite;
+}
+
+function getHotspotTexture(accent) {
+  if (hotspotTextureCache.has(accent)) return hotspotTextureCache.get(accent);
+
+  const canvasTexture = document.createElement("canvas");
+  canvasTexture.width = 128;
+  canvasTexture.height = 128;
+  const context = canvasTexture.getContext("2d");
+  const cx = 64;
+  const cy = 64;
+  const fill = accent || "#ff7d2f";
+
+  const glow = context.createRadialGradient(cx, cy, 6, cx, cy, 54);
+  glow.addColorStop(0, "rgba(255,255,255,1)");
+  glow.addColorStop(0.32, fill);
+  glow.addColorStop(0.72, "rgba(255,125,47,0.56)");
+  glow.addColorStop(1, "rgba(255,125,47,0)");
+  context.fillStyle = glow;
+  context.beginPath();
+  context.arc(cx, cy, 54, 0, Math.PI * 2);
+  context.fill();
+
+  context.fillStyle = "#ffffff";
+  context.beginPath();
+  context.arc(cx, cy, 28, 0, Math.PI * 2);
+  context.fill();
+
+  context.lineWidth = 10;
+  context.strokeStyle = fill;
+  context.beginPath();
+  context.arc(cx, cy, 28, 0, Math.PI * 2);
+  context.stroke();
+
+  const texture = new THREE.CanvasTexture(canvasTexture);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  hotspotTextureCache.set(accent, texture);
+  return texture;
+}
+
+function syncHotspots() {
+  hotspotRoot.children.forEach((marker) => {
+    const isActive = marker.userData.hotspotIndex === activeHotspotIndex;
+    marker.material.color.set(getSection().accent);
+    marker.material.opacity = isActive ? 1 : 0.84;
+    marker.scale.setScalar((isActive ? 1.55 : 1.1) * Math.max(modelRadius * 0.014, 34));
+  });
+  requestRender();
+}
+
+function focusHotspot(hotspot, index) {
+  activeHotspotIndex = index;
+  state.cardIndex = hotspot.cardIndex;
+  showInfoCard();
+  renderCard();
+  persistState();
+
+  const section = getSection();
+  const direction = new THREE.Vector3(...(hotspot.direction || section.defaultCamera.direction)).normalize();
+  const distance = modelRadius * (hotspot.distance || section.defaultCamera.distance);
+  const target = hotspot.target ? new THREE.Vector3(...hotspot.target) : hotspotRoot.children[index]?.position.clone() || new THREE.Vector3();
+  const position = target.clone().add(direction.multiplyScalar(distance));
+
+  animateCameraTo(position, target);
+  playUiTone(520);
+  showToast(hotspot.title || getCurrentCard().title);
+}
+
+function animateCameraTo(position, target) {
+  cameraFlight = {
+    startedAt: performance.now(),
+    duration: 650,
+    fromPosition: camera.position.clone(),
+    fromTarget: controls.target.clone(),
+    toPosition: position.clone(),
+    toTarget: target.clone(),
+  };
+  controls.enabled = false;
+  requestRender();
+}
+
+function updateCameraFlight(now) {
+  if (!cameraFlight) return;
+
+  const t = THREE.MathUtils.clamp((now - cameraFlight.startedAt) / cameraFlight.duration, 0, 1);
+  const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  camera.position.lerpVectors(cameraFlight.fromPosition, cameraFlight.toPosition, eased);
+  controls.target.lerpVectors(cameraFlight.fromTarget, cameraFlight.toTarget, eased);
+  controls.update();
+  requestRender();
+
+  if (t >= 1) {
+    camera.position.copy(cameraFlight.toPosition);
+    controls.target.copy(cameraFlight.toTarget);
+    controls.update();
+    controls.enabled = true;
+    cameraFlight = null;
+  }
+}
+
+function showInfoCard() {
+  state.cardVisible = true;
+  infoCard.classList.remove("hidden");
+}
+
+function hideInfoCard() {
+  state.cardVisible = false;
+  infoCard.classList.add("hidden");
+  persistState();
+  showToast("Kart kapatıldı");
+}
+
+function getHotspotIntersection(event) {
+  const rect = canvas.getBoundingClientRect();
+  pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -(((event.clientY - rect.top) / rect.height) * 2 - 1);
+  raycaster.setFromCamera(pointer, camera);
+  return raycaster.intersectObjects(hotspotRoot.children, true)[0] || null;
+}
+
+function onCanvasPointerDown(event) {
+  pointerDrag = {
+    id: event.pointerId,
+    x: event.clientX,
+    y: event.clientY,
+    moved: false,
+  };
+}
+
+function onCanvasPointerMove(event) {
+  if (pointerDrag && pointerDrag.id === event.pointerId) {
+    const deltaX = Math.abs(event.clientX - pointerDrag.x);
+    const deltaY = Math.abs(event.clientY - pointerDrag.y);
+    if (deltaX > 5 || deltaY > 5) pointerDrag.moved = true;
+  }
+
+  const hit = getHotspotIntersection(event);
+  canvas.style.cursor = hit ? "pointer" : "default";
+}
+
+function onCanvasPointerUp(event) {
+  if (!pointerDrag || pointerDrag.id !== event.pointerId) return;
+
+  const hit = pointerDrag.moved ? null : getHotspotIntersection(event);
+  pointerDrag = null;
+  if (!hit) return;
+
+  const hotspot = hit.object.userData.hotspot;
+  const index = hit.object.userData.hotspotIndex ?? 0;
+  focusHotspot(hotspot, index);
+}
+
 function centerModel(root) {
   root.updateWorldMatrix(true, true);
   const box = new THREE.Box3().setFromObject(root);
@@ -561,6 +743,7 @@ function resize() {
 }
 
 function tick() {
+  updateCameraFlight(performance.now());
   controls.update();
   if (!renderRequested) return;
   renderer.render(scene, camera);
@@ -576,9 +759,6 @@ function toggleMenu() {
   const hidden = menuPanel.classList.contains("hidden");
   menuPanel.setAttribute("aria-hidden", String(hidden));
   scrim.classList.toggle("hidden", hidden);
-  if (!hidden) {
-    cardCounter.textContent = `${state.cardIndex + 1} / ${getSection().cards.length}`;
-  }
   playUiTone(280);
 }
 
@@ -678,6 +858,7 @@ function restoreState() {
     if (saved.sectionId && sections.some((section) => section.id === saved.sectionId)) state.sectionId = saved.sectionId;
     if (Number.isInteger(saved.cardIndex)) state.cardIndex = saved.cardIndex;
     if (typeof saved.soundEnabled === "boolean") state.soundEnabled = saved.soundEnabled;
+    if (typeof saved.cardVisible === "boolean") state.cardVisible = saved.cardVisible;
   } catch {
     // ignore broken state
   }

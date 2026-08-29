@@ -111,30 +111,14 @@ button:focus-visible {
 .info-card {
   top: 50%;
   right: 30px;
-  width: min(380px, calc(100vw - 48px));
+  width: min(364px, calc(100vw - 48px));
   max-height: min(78vh, 760px);
-  padding: 18px;
-  border-radius: 28px;
+  padding: 16px;
+  border-radius: 26px;
   transform: translateY(-50%);
   background: var(--panel-strong);
   box-shadow: var(--shadow);
   overflow: hidden auto;
-}
-
-.info-card-head {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 12px;
-}
-
-.section-pill {
-  margin: 0 0 8px;
-  color: var(--accent);
-  font-size: 14px;
-  font-weight: 900;
-  letter-spacing: 0;
 }
 
 .info-card h1,
@@ -143,30 +127,8 @@ button:focus-visible {
   margin: 0;
 }
 
-.info-card h1 {
-  color: var(--ink);
-  font-size: 28px;
-  line-height: 1.04;
-}
-
-.card-index {
-  flex: 0 0 auto;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(255, 125, 47, 0.12);
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.card-stage {
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) 34px;
-  align-items: center;
-  gap: 10px;
-}
-
 .card-frame {
+  position: relative;
   margin: 0;
   overflow: hidden;
   border-radius: 28px;
@@ -216,14 +178,18 @@ button:focus-visible {
   line-height: 1.45;
 }
 
-.card-step {
+.card-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.94);
   color: var(--ink);
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 800;
   line-height: 1;
   box-shadow: 0 8px 20px rgba(35, 42, 56, 0.14);
 }
@@ -231,13 +197,13 @@ button:focus-visible {
 .card-meta {
   display: grid;
   gap: 10px;
-  padding: 14px 4px 4px;
+  padding: 14px 4px 6px;
   text-align: center;
 }
 
 .card-meta h2 {
   color: var(--accent);
-  font-size: 34px;
+  font-size: 32px;
   line-height: 1;
 }
 
@@ -245,26 +211,6 @@ button:focus-visible {
   color: var(--ink);
   font-size: 17px;
   line-height: 1.42;
-}
-
-.card-dots {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  padding-top: 14px;
-}
-
-.card-dot {
-  width: 11px;
-  height: 11px;
-  border-radius: 999px;
-  background: rgba(70, 77, 92, 0.28);
-}
-
-.card-dot.active {
-  width: 22px;
-  background: var(--accent);
 }
 
 .menu-panel {
@@ -420,10 +366,6 @@ button:focus-visible {
   .info-card {
     width: min(340px, calc(100vw - 28px));
   }
-
-  .info-card h1 {
-    font-size: 24px;
-  }
 }
 
 @media (max-width: 760px) {
@@ -454,10 +396,6 @@ button:focus-visible {
     transform: none;
     width: min(92vw, 340px);
     max-height: 54vh;
-  }
-
-  .card-stage {
-    grid-template-columns: 30px minmax(0, 1fr) 30px;
   }
 
   .card-meta h2 {

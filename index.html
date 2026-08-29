@@ -47,35 +47,23 @@
       </div>
 
       <aside class="info-card" id="infoCard" aria-label="Kart">
-        <div class="info-card-head">
-          <div>
-            <p class="section-pill" id="sectionPill">1. Kısım</p>
-            <h1 id="sectionTitle">Nöronun Yapısı</h1>
-          </div>
-          <span class="card-index" id="cardCounter">1 / 1</span>
-        </div>
+        <button class="card-close" id="cardClose" type="button" aria-label="Kartı kapat">×</button>
 
-        <div class="card-stage">
-          <button class="card-step" id="cardPrev" type="button" aria-label="Önceki kart">‹</button>
-          <figure class="card-frame">
-            <img id="cardImage" alt="" />
-            <div class="card-fallback hidden" id="cardFallback">
-              <div class="card-fallback-mark">
-                <img id="cardEmblem" alt="" />
-              </div>
-              <h2 id="cardFallbackTitle">Kart</h2>
-              <p id="cardFallbackDesc"></p>
+        <figure class="card-frame">
+          <img id="cardImage" alt="" />
+          <div class="card-fallback hidden" id="cardFallback">
+            <div class="card-fallback-mark">
+              <img id="cardEmblem" alt="" />
             </div>
-          </figure>
-          <button class="card-step" id="cardNext" type="button" aria-label="Sonraki kart">›</button>
-        </div>
+            <h2 id="cardFallbackTitle">Kart</h2>
+            <p id="cardFallbackDesc"></p>
+          </div>
+        </figure>
 
         <div class="card-meta">
           <h2 id="cardTitle">Dendrit</h2>
           <p id="cardDescription">Nöronun seçili bölümünü gösterir.</p>
         </div>
-
-        <div class="card-dots" id="cardDots" aria-label="Kart seçimi"></div>
       </aside>
 
       <section class="menu-panel hidden" id="menuPanel" aria-label="Menü" aria-hidden="true">
