@@ -113,6 +113,15 @@ button:focus-visible {
 .section-button {
   width: 136px;
   height: 136px;
+  border-radius: 26px;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(23, 31, 46, 0.18);
+}
+
+.section-button[aria-pressed="true"] {
+  box-shadow:
+    0 0 0 5px rgba(64, 255, 51, 0.95),
+    0 10px 20px rgba(23, 31, 46, 0.2);
 }
 
 .section-button img {

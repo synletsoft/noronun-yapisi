@@ -19,29 +19,29 @@ const sections = [
     buttonActive: "./kaynak/1. Kısım/Dentridbağlantıbt2.png",
     defaultCamera: { direction: [0, 0.12, 1], distance: 2.5, fov: 42 },
     hotspots: [
-      { number: 1, cardIndex: 0, title: "Dendrit", point: [0.19, 0.70, 0.54], direction: [0.18, 0.08, 1], distance: 0.92, fov: 34 },
-      { number: 2, cardIndex: 1, title: "Hücre Gövdesi", point: [0.39, 0.54, 0.55], direction: [0.08, 0.04, 1], distance: 0.72, fov: 31 },
-      { number: 3, cardIndex: 5, title: "Akson", point: [0.62, 0.50, 0.54], direction: [0.10, 0.02, 1], distance: 0.74, fov: 30 },
+      { number: 5, cardIndex: 0, title: "Çekirdek", point: [0.30, 0.60, 0.50], direction: [-0.04, 0.03, 1], distance: 0.58, fov: 30 },
+      { number: 2, cardIndex: 1, title: "Soma", point: [0.39, 0.54, 0.55], direction: [0.08, 0.04, 1], distance: 0.72, fov: 31 },
+      { number: 1, cardIndex: 2, title: "Dendrit", point: [0.19, 0.70, 0.54], direction: [0.18, 0.08, 1], distance: 0.92, fov: 34 },
       { number: 4, cardIndex: 3, title: "Miyelin Kılıf", point: [0.54, 0.53, 0.52], direction: [0.06, -0.02, 1], distance: 0.68, fov: 29 },
-      { number: 5, cardIndex: 2, title: "Çekirdek", point: [0.30, 0.60, 0.50], direction: [-0.04, 0.03, 1], distance: 0.58, fov: 30 },
+      { number: 3, cardIndex: 4, title: "Akson", point: [0.62, 0.50, 0.54], direction: [0.10, 0.02, 1], distance: 0.74, fov: 30 },
+      { number: 7, cardIndex: 5, title: "Schwann Hücresi", point: [0.70, 0.60, 0.54], direction: [0.05, -0.02, 1], distance: 0.56, fov: 29 },
       { number: 6, cardIndex: 6, title: "Akson Ucu", point: [0.88, 0.52, 0.53], direction: [0.15, 0.03, 1], distance: 0.84, fov: 32 },
-      { number: 7, cardIndex: 7, title: "Schwann Hücresi", point: [0.70, 0.60, 0.54], direction: [0.05, -0.02, 1], distance: 0.56, fov: 29 },
     ],
     cards: [
-      {
-        title: "Dendrit",
-        description: "Diğer nöronlardan veya reseptörlerden gelen uyarıları alır ve hücre gövdesine iletir.",
-        image: "./kaynak/1. Kısım/kartlar/Dendrit.png",
-      },
-      {
-        title: "Hücre Gövdesi",
-        description: "Nöronun çekirdek ve organellerini barındıran merkez bölümüdür.",
-        image: "./kaynak/1. Kısım/kartlar/Hücre Gövdesi(soma).png",
-      },
       {
         title: "Çekirdek",
         description: "Hücre etkinliklerini yöneten genetik kontrol merkezidir.",
         image: "./kaynak/1. Kısım/kartlar/Çekirdek.png",
+      },
+      {
+        title: "Soma",
+        description: "Nöronun çekirdek ve organellerini barındıran merkez bölümüdür.",
+        image: "./kaynak/1. Kısım/kartlar/Hücre Gövdesi(soma).png",
+      },
+      {
+        title: "Dendrit",
+        description: "Diğer nöronlardan veya reseptörlerden gelen uyarıları alır ve hücre gövdesine iletir.",
+        image: "./kaynak/1. Kısım/kartlar/Dendrit.png",
       },
       {
         title: "Miyelin Kılıf",
@@ -49,24 +49,19 @@ const sections = [
         image: "./kaynak/1. Kısım/kartlar/Miyelin kılıf.png",
       },
       {
-        title: "Ranvier Boğumu",
-        description: "İmpulsun sıçrayarak ilerlemesini sağlayan açık bölgedir.",
-        image: "./kaynak/1. Kısım/kartlar/Ranvier boğumu.png",
-      },
-      {
         title: "Akson",
         description: "İmpulsu hücre gövdesinden akson uçlarına doğru iletir.",
         image: "./kaynak/1. Kısım/kartlar/Akson.png",
       },
       {
-        title: "Akson Ucu",
-        description: "Sinyali bir sonraki hücreye aktaran sinaptik uç bölümüdür.",
-        image: "./kaynak/1. Kısım/kartlar/Akson ucu (Sinaptik uç).png",
-      },
-      {
         title: "Schwann Hücresi",
         description: "Akson çevresinde miyelin kılıfı oluşturarak sinir iletimini hızlandırır.",
         image: "./kaynak/1. Kısım/kartlar/Miyelin kılıf.png",
+      },
+      {
+        title: "Akson Ucu",
+        description: "Sinyali bir sonraki hücreye aktaran sinaptik uç bölümüdür.",
+        image: "./kaynak/1. Kısım/kartlar/Akson ucu (Sinaptik uç).png",
       },
     ],
   },
@@ -102,7 +97,7 @@ const sections = [
   },
 ];
 
-const STORAGE_KEY = "noron-viewer-state-v2";
+const STORAGE_KEY = "noron-viewer-state-v3";
 const state = {
   sectionId: "section-1",
   cardIndex: 0,
@@ -417,24 +412,34 @@ function focusHotspot(hotspot, index) {
 }
 
 function animateCameraTo(position, target, fov = camera.fov) {
-  const arcDirection = new THREE.Vector3()
-    .subVectors(position, camera.position)
-    .cross(new THREE.Vector3(0, 1, 0))
-    .normalize();
-  if (arcDirection.lengthSq() === 0) arcDirection.set(1, 0, 0);
-  arcDirection.multiplyScalar(modelRadius * 0.11);
-  arcDirection.y += modelRadius * 0.12;
+  const up = new THREE.Vector3(0, 1, 0);
+  const travel = new THREE.Vector3().subVectors(position, camera.position);
+  const side = new THREE.Vector3().crossVectors(travel, up);
+  if (side.lengthSq() === 0) side.set(1, 0, 0);
+  side.normalize();
+
+  const distance = travel.length();
+  const curve = modelRadius * THREE.MathUtils.clamp(0.09 + distance / (modelRadius * 16), 0.1, 0.22);
+  const rise = modelRadius * THREE.MathUtils.clamp(0.08 + distance / (modelRadius * 20), 0.08, 0.16);
+  const midPosition = camera.position
+    .clone()
+    .lerp(position, 0.5)
+    .addScaledVector(side, curve)
+    .addScaledVector(up, rise);
+
+  const midTarget = controls.target.clone().lerp(target, 0.5);
 
   cameraFlight = {
     startedAt: performance.now(),
-    duration: 1250,
+    duration: THREE.MathUtils.clamp(980 + distance * 190, 1100, 1850),
     fromPosition: camera.position.clone(),
     fromTarget: controls.target.clone(),
     fromFov: camera.fov,
     toPosition: position.clone(),
     toTarget: target.clone(),
+    midPosition,
+    midTarget,
     toFov: fov,
-    arcDirection,
   };
   controls.enabled = false;
   requestRender();
@@ -445,9 +450,17 @@ function updateCameraFlight(now) {
 
   const t = THREE.MathUtils.clamp((now - cameraFlight.startedAt) / cameraFlight.duration, 0, 1);
   const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  camera.position.lerpVectors(cameraFlight.fromPosition, cameraFlight.toPosition, eased);
-  camera.position.addScaledVector(cameraFlight.arcDirection, Math.sin(Math.PI * eased));
-  controls.target.lerpVectors(cameraFlight.fromTarget, cameraFlight.toTarget, eased);
+  const omt = 1 - eased;
+  camera.position
+    .copy(cameraFlight.fromPosition)
+    .multiplyScalar(omt * omt)
+    .addScaledVector(cameraFlight.midPosition, 2 * omt * eased)
+    .addScaledVector(cameraFlight.toPosition, eased * eased);
+  controls.target
+    .copy(cameraFlight.fromTarget)
+    .multiplyScalar(omt * omt)
+    .addScaledVector(cameraFlight.midTarget, 2 * omt * eased)
+    .addScaledVector(cameraFlight.toTarget, eased * eased);
   camera.fov = THREE.MathUtils.lerp(cameraFlight.fromFov, cameraFlight.toFov, eased);
   camera.updateProjectionMatrix();
   controls.update();
