@@ -19,7 +19,7 @@ const sections = [
     buttonActive: "./kaynak/1. Kısım/Dentridbağlantıbt2.png",
     defaultCamera: { direction: [0, 0.12, 1], distance: 2.5, fov: 42 },
     hotspots: [
-      { number: 5, cardIndex: 0, title: "Çekirdek", point: [0.30, 0.60, 0.50], direction: [-0.04, 0.03, 1], distance: 0.58, fov: 30 },
+      { number: 5, cardIndex: 0, title: "Çekirdek", point: [0.15, 0.56, 0.50], direction: [-0.02, 0.03, 1], distance: 0.52, fov: 29 },
       { number: 2, cardIndex: 1, title: "Soma", point: [0.39, 0.54, 0.55], direction: [0.08, 0.04, 1], distance: 0.72, fov: 31 },
       { number: 1, cardIndex: 2, title: "Dendrit", point: [0.19, 0.70, 0.54], direction: [0.18, 0.08, 1], distance: 0.92, fov: 34 },
       { number: 4, cardIndex: 3, title: "Miyelin Kılıf", point: [0.54, 0.53, 0.52], direction: [0.06, -0.02, 1], distance: 0.68, fov: 29 },
@@ -285,6 +285,7 @@ function switchSection(sectionId) {
   state.cardIndex = 0;
   state.cardVisible = false;
   applyTheme(getSection());
+  renderSectionButtons();
   renderCard();
   persistState();
   loadCurrentSection({ immediate: true });
