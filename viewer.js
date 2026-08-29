@@ -24,7 +24,7 @@ const sections = [
       { number: 1, cardIndex: 2, title: "Dendrit", point: [0.19, 0.70, 0.54], direction: [0.18, 0.08, 1], distance: 0.92, fov: 34 },
       { number: 4, cardIndex: 3, title: "Miyelin Kılıf", point: [0.54, 0.53, 0.52], direction: [0.06, -0.02, 1], distance: 0.68, fov: 29 },
       { number: 3, cardIndex: 4, title: "Akson", point: [0.62, 0.50, 0.54], direction: [0.10, 0.02, 1], distance: 0.74, fov: 30 },
-      { number: 7, cardIndex: 5, title: "Schwann Hücresi", point: [0.70, 0.60, 0.54], direction: [0.05, -0.02, 1], distance: 0.56, fov: 29 },
+      { number: 7, cardIndex: 5, title: "Ranvier Boğumu", point: [0.58, 0.52, 0.52], direction: [0.03, -0.01, 1], distance: 0.55, fov: 29 },
       { number: 6, cardIndex: 6, title: "Akson Ucu", point: [0.88, 0.52, 0.53], direction: [0.15, 0.03, 1], distance: 0.84, fov: 32 },
     ],
     cards: [
@@ -54,9 +54,9 @@ const sections = [
         image: "./kaynak/1. Kısım/kartlar/Akson.png",
       },
       {
-        title: "Schwann Hücresi",
-        description: "Akson çevresinde miyelin kılıfı oluşturarak sinir iletimini hızlandırır.",
-        image: "./kaynak/1. Kısım/kartlar/Miyelin kılıf.png",
+        title: "Ranvier Boğumu",
+        description: "Miyelin kılıflar arasındaki boşluktur. İmpulsun sıçrayarak iletilmesini sağlayarak iletim hızını artırır.",
+        image: "./kaynak/1. Kısım/kartlar/Ranvier boğumu.png",
       },
       {
         title: "Akson Ucu",
