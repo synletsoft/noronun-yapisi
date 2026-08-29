@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nöronun Yapısı 3B</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./styles.css?v=20260829-neuron" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main class="viewer-shell" id="app">
+      <canvas id="scene" aria-label="Nöron yapısını etkileşimli olarak inceleyebileceğiniz 3D model"></canvas>
+
+      <aside class="section-rail" aria-label="Kısımlar">
+        <button class="section-button" id="sectionButton1" type="button" aria-label="1. Kısım">
+          <img id="sectionButtonImage1" alt="" />
+        </button>
+        <button class="section-button" id="sectionButton2" type="button" aria-label="2. Kısım">
+          <img id="sectionButtonImage2" alt="" />
+        </button>
+      </aside>
+
+      <div class="top-actions" aria-label="Araçlar">
+        <button class="tool-button" id="refreshButton" type="button" aria-label="Yenile">
+          <img id="refreshIcon" alt="" />
+        </button>
+        <button class="tool-button" id="soundButton" type="button" aria-label="Ses">
+          <img id="soundIcon" alt="" />
+        </button>
+        <button class="tool-button" id="menuButton" type="button" aria-label="Menü">
+          <img id="menuIcon" alt="" />
+        </button>
+        <button class="tool-button" id="shareButton" type="button" aria-label="Paylaş">
+          <img id="shareIcon" alt="" />
+        </button>
+        <button class="tool-button" id="fullscreenButton" type="button" aria-label="Tam ekran">
+          <img id="fullscreenIcon" alt="" />
+        </button>
+      </div>
+
+      <aside class="info-card" id="infoCard" aria-label="Kart">
+        <div class="info-card-head">
+          <div>
+            <p class="section-pill" id="sectionPill">1. Kısım</p>
+            <h1 id="sectionTitle">Nöronun Yapısı</h1>
+          </div>
+          <span class="card-index" id="cardCounter">1 / 1</span>
+        </div>
+
+        <div class="card-stage">
+          <button class="card-step" id="cardPrev" type="button" aria-label="Önceki kart">‹</button>
+          <figure class="card-frame">
+            <img id="cardImage" alt="" />
+            <div class="card-fallback hidden" id="cardFallback">
+              <div class="card-fallback-mark">
+                <img id="cardEmblem" alt="" />
+              </div>
+              <h2 id="cardFallbackTitle">Kart</h2>
+              <p id="cardFallbackDesc"></p>
+            </div>
+          </figure>
+          <button class="card-step" id="cardNext" type="button" aria-label="Sonraki kart">›</button>
+        </div>
+
+        <div class="card-meta">
+          <h2 id="cardTitle">Dendrit</h2>
+          <p id="cardDescription">Nöronun seçili bölümünü gösterir.</p>
+        </div>
+
+        <div class="card-dots" id="cardDots" aria-label="Kart seçimi"></div>
+      </aside>
+
+      <section class="menu-panel hidden" id="menuPanel" aria-label="Menü" aria-hidden="true">
+        <button class="menu-item" id="menuSection1" type="button">1. Kısım</button>
+        <button class="menu-item" id="menuSection2" type="button">2. Kısım</button>
+        <button class="menu-item" id="menuReset" type="button">Görünümü Sıfırla</button>
+        <button class="menu-item" id="menuSound" type="button">Sesi Aç/Kapat</button>
+      </section>
+
+      <section class="loading-overlay" id="loadingOverlay" aria-live="polite">
+        <div class="loading-card">
+          <div class="loading-mark"></div>
+          <h2>3D model hazırlanıyor</h2>
+          <p id="loadingText">Nöron modeli yükleniyor</p>
+          <div class="loading-bar"><span id="loadingBar"></span></div>
+        </div>
+      </section>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      <div class="sr-only" id="liveRegion" aria-live="polite"></div>
+      <div class="scrim hidden" id="scrim"></div>
+    </main>
+
+    <script type="module" src="./viewer.js?v=20260829-neuron"></script>
+  </body>
+</html>
