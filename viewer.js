@@ -165,6 +165,7 @@ let audioContext = null;
 let renderRequested = true;
 let toastTimer = null;
 let currentCardSource = "";
+let materialCache = new Map();
 
 applyIcons();
 restoreState();
@@ -378,9 +379,11 @@ function loadCurrentSection({ immediate = false } = {}) {
     (gltf) => {
       if (token !== loadingToken) return;
       modelRoot.clear();
+      materialCache = new Map();
       modelRoot.add(gltf.scene);
       centerModel(gltf.scene);
       prepareModel(gltf.scene);
+      applyReferenceMaterials(gltf.scene, section);
       frameCamera(section, immediate);
       loadingOverlay.classList.add("hidden");
       loadingBar.style.width = "100%";
@@ -402,6 +405,120 @@ function prepareModel(root) {
     if (!object.isMesh) return;
     object.castShadow = false;
     object.receiveShadow = false;
+  });
+}
+
+function applyReferenceMaterials(root, section) {
+  const box = new THREE.Box3().setFromObject(root);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const spanX = Math.max(size.x, 1);
+
+  const createMaterial = (key, options) => {
+    if (!materialCache.has(key)) {
+      materialCache.set(
+        key,
+        new THREE.MeshStandardMaterial({
+          roughness: 0.72,
+          metalness: 0.02,
+          flatShading: false,
+          side: THREE.DoubleSide,
+          ...options,
+        }),
+      );
+    }
+    return materialCache.get(key);
+  };
+
+  root.traverse((object) => {
+    if (!object.isMesh) return;
+
+    const meshBox = new THREE.Box3().setFromObject(object);
+    const meshCenter = meshBox.getCenter(new THREE.Vector3());
+    const x = (meshCenter.x - box.min.x) / spanX;
+    const name = (object.name || "").toLowerCase();
+    let material;
+
+    if (section.id === "section-1") {
+      if (name.includes("çekirdek")) {
+        material = createMaterial("s1-core", {
+          color: 0xdb7a25,
+          roughness: 0.5,
+          emissive: new THREE.Color(0x2d1204),
+          emissiveIntensity: 0.1,
+        });
+      } else if (name.includes("çubuk") || x > 0.42) {
+        const mix = THREE.MathUtils.clamp((x - 0.35) / 0.55, 0, 1);
+        const color = new THREE.Color().lerpColors(new THREE.Color(0xf0a154), new THREE.Color(0x68abff), mix);
+        material = createMaterial(`s1-axon-${Math.round(mix * 6)}`, {
+          color,
+          roughness: 0.46,
+          metalness: 0.04,
+        });
+      } else {
+        const tone = new THREE.Color().lerpColors(
+          new THREE.Color(0xf3aa62),
+          new THREE.Color(0xffd3a1),
+          THREE.MathUtils.clamp(0.2 + (center.x - meshCenter.x) / spanX * 0.12, 0, 1),
+        );
+        material = createMaterial(`s1-base-${Math.round(x * 4)}`, {
+          color: tone,
+          roughness: 0.6,
+          metalness: 0.02,
+        });
+      }
+    } else {
+      if (name.includes("kırmızı")) {
+        material = createMaterial(`s2-red-${name}`, {
+          color: 0xd81f26,
+          roughness: 0.55,
+          metalness: 0.04,
+          emissive: new THREE.Color(0x360000),
+          emissiveIntensity: 0.16,
+        });
+      } else if (name.includes("yeşil")) {
+        material = createMaterial(`s2-green-${name}`, {
+          color: 0x4fc87f,
+          roughness: 0.52,
+          metalness: 0.03,
+          emissive: new THREE.Color(0x11361b),
+          emissiveIntensity: 0.08,
+        });
+      } else if (name.includes("sphere")) {
+        material = createMaterial(`s2-sphere-${name}`, {
+          color: 0x7153e8,
+          roughness: 0.43,
+          metalness: 0.08,
+          emissive: new THREE.Color(0x160f48),
+          emissiveIntensity: 0.11,
+        });
+      } else if (name.includes("tube") || name.includes("bağlantı") || name.includes("kanal")) {
+        const channelColor = x > 0.5 ? 0x1847e8 : 0x2c6eff;
+        material = createMaterial(`s2-channel-${Math.round(x * 6)}`, {
+          color: channelColor,
+          roughness: 0.34,
+          metalness: 0.12,
+          emissive: new THREE.Color(0x07124c),
+          emissiveIntensity: 0.18,
+        });
+      } else if (name.includes("akson") || name.includes("dendrit") || name.includes("sarmaşık")) {
+        const warm = x > 0.52 ? 0xd8ab82 : 0xbd8361;
+        material = createMaterial(`s2-nerve-${Math.round(x * 4)}`, {
+          color: warm,
+          roughness: 0.9,
+          metalness: 0.0,
+        });
+      } else {
+        const base = x > 0.52 ? 0x9a7764 : 0x6b5246;
+        material = createMaterial(`s2-base-${Math.round(x * 5)}`, {
+          color: base,
+          roughness: 0.96,
+          metalness: 0.0,
+        });
+      }
+    }
+
+    object.material = material;
   });
 }
 
