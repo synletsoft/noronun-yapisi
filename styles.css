@@ -66,7 +66,6 @@ button:focus-visible {
 .section-rail,
 .top-actions,
 .info-card,
-.menu-panel,
 .hotspot-layer {
   position: absolute;
   z-index: 4;
@@ -226,51 +225,6 @@ button:focus-visible {
   box-shadow: 0 8px 20px rgba(35, 42, 56, 0.14);
 }
 
-.card-meta {
-  display: grid;
-  gap: 10px;
-  padding: 14px 4px 6px;
-  text-align: center;
-}
-
-.card-meta h2 {
-  color: var(--accent);
-  font-size: 32px;
-  line-height: 1;
-}
-
-.card-meta p {
-  color: var(--ink);
-  font-size: 17px;
-  line-height: 1.42;
-}
-
-.menu-panel {
-  top: 130px;
-  right: 28px;
-  width: 220px;
-  padding: 12px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: var(--shadow);
-}
-
-.menu-item {
-  display: block;
-  width: 100%;
-  min-height: 42px;
-  margin-bottom: 8px;
-  border-radius: 12px;
-  background: rgba(255, 125, 47, 0.1);
-  color: var(--ink);
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.menu-item:last-child {
-  margin-bottom: 0;
-}
-
 .loading-overlay {
   position: absolute;
   inset: 0;
@@ -367,13 +321,6 @@ button:focus-visible {
   clip: rect(0, 0, 0, 0);
 }
 
-.scrim {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  background: rgba(0, 0, 0, 0.18);
-}
-
 .hidden {
   display: none !important;
 }
@@ -430,17 +377,4 @@ button:focus-visible {
     max-height: 54vh;
   }
 
-  .card-meta h2 {
-    font-size: 28px;
-  }
-
-  .card-meta p {
-    font-size: 15px;
-  }
-
-  .menu-panel {
-    top: 96px;
-    right: 14px;
-    width: min(220px, calc(100vw - 28px));
-  }
 }

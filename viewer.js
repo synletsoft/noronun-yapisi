@@ -118,12 +118,10 @@ const sectionButton1 = document.querySelector("#sectionButton1");
 const sectionButton2 = document.querySelector("#sectionButton2");
 const refreshButton = document.querySelector("#refreshButton");
 const soundButton = document.querySelector("#soundButton");
-const menuButton = document.querySelector("#menuButton");
 const shareButton = document.querySelector("#shareButton");
 const fullscreenButton = document.querySelector("#fullscreenButton");
 const refreshIcon = document.querySelector("#refreshIcon");
 const soundIcon = document.querySelector("#soundIcon");
-const menuIcon = document.querySelector("#menuIcon");
 const shareIcon = document.querySelector("#shareIcon");
 const fullscreenIcon = document.querySelector("#fullscreenIcon");
 const infoCard = document.querySelector("#infoCard");
@@ -134,19 +132,11 @@ const cardFallback = document.querySelector("#cardFallback");
 const cardEmblem = document.querySelector("#cardEmblem");
 const cardFallbackTitle = document.querySelector("#cardFallbackTitle");
 const cardFallbackDesc = document.querySelector("#cardFallbackDesc");
-const cardTitle = document.querySelector("#cardTitle");
-const cardDescription = document.querySelector("#cardDescription");
-const menuPanel = document.querySelector("#menuPanel");
-const menuSection1 = document.querySelector("#menuSection1");
-const menuSection2 = document.querySelector("#menuSection2");
-const menuReset = document.querySelector("#menuReset");
-const menuSound = document.querySelector("#menuSound");
 const loadingOverlay = document.querySelector("#loadingOverlay");
 const loadingText = document.querySelector("#loadingText");
 const loadingBar = document.querySelector("#loadingBar");
 const toast = document.querySelector("#toast");
 const liveRegion = document.querySelector("#liveRegion");
-const scrim = document.querySelector("#scrim");
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(42, 1, 0.01, 1000);
@@ -210,7 +200,6 @@ function getCurrentCard() {
 function applyIcons() {
   setButtonImage(refreshIcon, "./kaynak/1. Kısım/yenilebt.png");
   setButtonImage(soundIcon, state.soundEnabled ? "./kaynak/1. Kısım/sesbt-1.png" : "./kaynak/1. Kısım/sesbt.png");
-  setButtonImage(menuIcon, "./kaynak/1. Kısım/menubt.png");
   setButtonImage(shareIcon, "./kaynak/1. Kısım/paylasbt.png");
   setButtonImage(fullscreenIcon, "./kaynak/1. Kısım/tamekranbt.png");
 }
@@ -233,8 +222,6 @@ function renderCard() {
   const section = getSection();
   const card = getCurrentCard();
 
-  cardTitle.textContent = card.title;
-  cardDescription.textContent = card.description;
   currentCardSource = card.image ? new URL(card.image, import.meta.url).href : "";
   activeHotspotIndex = state.cardVisible ? section.hotspots.findIndex((hotspot) => hotspot.cardIndex === state.cardIndex) : -1;
 
@@ -279,27 +266,8 @@ function wireEvents() {
     showToast("Görünüm yenilendi");
   });
   soundButton.addEventListener("click", toggleSound);
-  menuButton.addEventListener("click", toggleMenu);
   shareButton.addEventListener("click", sharePage);
   fullscreenButton.addEventListener("click", toggleFullscreen);
-  menuSection1.addEventListener("click", () => {
-    hideMenu();
-    switchSection("section-1");
-  });
-  menuSection2.addEventListener("click", () => {
-    hideMenu();
-    switchSection("section-2");
-  });
-  menuReset.addEventListener("click", () => {
-    hideMenu();
-    loadCurrentSection({ immediate: true });
-  });
-  menuSound.addEventListener("click", () => {
-    hideMenu();
-    toggleSound();
-  });
-
-  scrim.addEventListener("click", hideMenu);
   window.addEventListener("resize", resize);
   document.addEventListener("keydown", onKeyDown);
   document.addEventListener("fullscreenchange", syncFullscreenButton);
@@ -310,20 +278,15 @@ function wireEvents() {
 }
 
 function onKeyDown(event) {
-  if (event.code === "Escape") {
-    hideMenu();
-    return;
-  }
+  if (event.code === "Escape") return;
   if (event.code === "KeyR") loadCurrentSection({ immediate: true });
   if (event.code === "KeyF") toggleFullscreen();
-  if (event.code === "KeyM") toggleMenu();
   if (event.code === "Digit1") switchSection("section-1");
   if (event.code === "Digit2") switchSection("section-2");
 }
 
 function switchSection(sectionId) {
   if (state.sectionId === sectionId) return;
-  hideMenu();
   state.sectionId = sectionId;
   state.cardIndex = 0;
   state.cardVisible = false;
@@ -371,7 +334,9 @@ function loadCurrentSection({ immediate = false } = {}) {
       modelRoot.add(gltf.scene);
       centerModel(gltf.scene);
       prepareModel(gltf.scene);
-      applyReferenceMaterials(gltf.scene, section);
+      if (!hasEmbeddedAppearance(gltf.scene)) {
+        applyReferenceMaterials(gltf.scene, section);
+      }
       buildHotspots(gltf.scene, section);
       frameCamera(section, immediate);
       loadingOverlay.classList.add("hidden");
@@ -395,6 +360,41 @@ function prepareModel(root) {
     object.castShadow = false;
     object.receiveShadow = false;
   });
+}
+
+function hasEmbeddedAppearance(root) {
+  let found = false;
+  root.traverse((object) => {
+    if (found || !object.isMesh) return;
+    const materials = Array.isArray(object.material) ? object.material : [object.material];
+    for (const material of materials) {
+      if (!material) continue;
+      const textureKeys = [
+        "map",
+        "alphaMap",
+        "aoMap",
+        "bumpMap",
+        "displacementMap",
+        "emissiveMap",
+        "lightMap",
+        "metalnessMap",
+        "normalMap",
+        "roughnessMap",
+      ];
+      const hasTexture = textureKeys.some((key) => Boolean(material[key]));
+      const hasColor = material.color && material.color.getHexString?.() !== "ffffff";
+      const hasEmissive = material.emissive && material.emissive.getHexString?.() !== "000000";
+      const hasPBRVariation =
+        (typeof material.roughness === "number" && material.roughness !== 1) ||
+        (typeof material.metalness === "number" && material.metalness !== 0) ||
+        (typeof material.opacity === "number" && material.opacity !== 1);
+      if (hasTexture || hasColor || hasEmissive || hasPBRVariation) {
+        found = true;
+        return;
+      }
+    }
+  });
+  return found;
 }
 
 function applyReferenceMaterials(root, section) {
@@ -621,6 +621,7 @@ function updateCameraFlight(now) {
 function showInfoCard() {
   state.cardVisible = true;
   infoCard.classList.remove("hidden");
+  syncHotspots();
 }
 
 function hideInfoCard() {
@@ -628,6 +629,7 @@ function hideInfoCard() {
   infoCard.classList.add("hidden");
   persistState();
   showToast("Kart kapatıldı");
+  syncHotspots();
 }
 
 function centerModel(root) {
@@ -679,20 +681,6 @@ function tick() {
 
 function requestRender() {
   renderRequested = true;
-}
-
-function toggleMenu() {
-  menuPanel.classList.toggle("hidden");
-  const hidden = menuPanel.classList.contains("hidden");
-  menuPanel.setAttribute("aria-hidden", String(hidden));
-  scrim.classList.toggle("hidden", hidden);
-  playUiTone(280);
-}
-
-function hideMenu() {
-  menuPanel.classList.add("hidden");
-  menuPanel.setAttribute("aria-hidden", "true");
-  scrim.classList.add("hidden");
 }
 
 function toggleSound() {

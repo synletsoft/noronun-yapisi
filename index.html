@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nöronun Yapısı 3B</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260829-neuron" />
+    <link rel="stylesheet" href="./styles.css?v=20260829-neuron2" />
     <script type="importmap">
       {
         "imports": {
@@ -36,9 +36,6 @@
         <button class="tool-button" id="soundButton" type="button" aria-label="Ses">
           <img id="soundIcon" alt="" />
         </button>
-        <button class="tool-button" id="menuButton" type="button" aria-label="Menü">
-          <img id="menuIcon" alt="" />
-        </button>
         <button class="tool-button" id="shareButton" type="button" aria-label="Paylaş">
           <img id="shareIcon" alt="" />
         </button>
@@ -61,18 +58,7 @@
           </div>
         </figure>
 
-        <div class="card-meta">
-          <h2 id="cardTitle">Dendrit</h2>
-          <p id="cardDescription">Nöronun seçili bölümünü gösterir.</p>
-        </div>
       </aside>
-
-      <section class="menu-panel hidden" id="menuPanel" aria-label="Menü" aria-hidden="true">
-        <button class="menu-item" id="menuSection1" type="button">1. Kısım</button>
-        <button class="menu-item" id="menuSection2" type="button">2. Kısım</button>
-        <button class="menu-item" id="menuReset" type="button">Görünümü Sıfırla</button>
-        <button class="menu-item" id="menuSound" type="button">Sesi Aç/Kapat</button>
-      </section>
 
       <section class="loading-overlay" id="loadingOverlay" aria-live="polite">
         <div class="loading-card">
@@ -85,9 +71,8 @@
 
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
       <div class="sr-only" id="liveRegion" aria-live="polite"></div>
-      <div class="scrim hidden" id="scrim"></div>
     </main>
 
-    <script type="module" src="./viewer.js?v=20260829-neuron"></script>
+    <script type="module" src="./viewer.js?v=20260829-neuron2"></script>
   </body>
 </html>
