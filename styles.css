@@ -153,12 +153,12 @@ button:focus-visible {
   right: 30px;
   width: min(364px, calc(100vw - 48px));
   max-height: min(78vh, 760px);
-  padding: 16px;
-  border-radius: 26px;
   transform: translateY(-50%);
-  background: var(--panel-strong);
-  box-shadow: var(--shadow);
-  overflow: hidden auto;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
 }
 
 .info-card h1,
