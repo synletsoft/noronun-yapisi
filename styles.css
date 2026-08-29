@@ -66,9 +66,41 @@ button:focus-visible {
 .section-rail,
 .top-actions,
 .info-card,
-.menu-panel {
+.menu-panel,
+.hotspot-layer {
   position: absolute;
   z-index: 4;
+}
+
+.hotspot-layer {
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.hotspot-point {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  margin: 0;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.95);
+  background: rgba(58, 58, 64, 0.92);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 8px 18px rgba(27, 33, 43, 0.25);
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.hotspot-point.active {
+  width: 58px;
+  height: 58px;
+  border-width: 5px;
+  background: rgba(255, 125, 47, 0.98);
+  font-size: 24px;
 }
 
 .section-rail {
